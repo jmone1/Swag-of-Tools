@@ -1,11 +1,9 @@
 # Swag-of-Tools
 A Collection of Utilities for JRiver Media Center
 
-Thread for discusion at - https://yabb.jriver.com/interact/index.php/topic,106802.0.html
+More Details and the thread for discusion is at - https://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
-Last Updated: 02 July 2020
-
-Description:  MC Tool Box is a collection of my scripts in a single GUI maintaining a consistent Look and Feel and includes:
+Description:  "Swag of Tools" is a collection of my scripts in a single GUI maintaining a consistent Look and Feel and includes:
 - Chapterfy:  Creates Chapter Based Particles (so you can manage Music Videos on a per Track Basis as you can a CD)
 - Particlise:  Bulk Creation of Particles
 - Data Fiddler:  Lets you Import / Export / Update the MC Library from a Spreadsheet
