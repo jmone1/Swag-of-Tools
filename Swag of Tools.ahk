@@ -1,4 +1,4 @@
-﻿SwagOfToolVer = 2 July 2020
+﻿SwagOfToolVer = 10 Oct 2020
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -492,8 +492,6 @@ Loop %NumberofPlaylistMarks% ; Gets the details for each chapter and calculates 
 
 	If MarkType != 2 ; ignore Link Points (which are #2) and write the contents to the file
 		{
-		If A_Index < 10
-			Chap_N = 0%A_Index%
 		FileAppend, CHAPTER%Chap_N%=%ChapterStartTime%`n, temp.chapters.txt 
 		FileAppend, CHAPTER%Chap_N%NAME=Chapter %Chap_N%`n, temp.chapters.txt
 		Chap_N := Chap_N + 1
