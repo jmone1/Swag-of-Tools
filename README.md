@@ -1,5 +1,5 @@
 # Swag-of-Tools
-A set Collection of Utilities for JRiver Media Center
+A Collection of Utilities for JRiver Media Center
 
 Thread for discusion at - https://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
