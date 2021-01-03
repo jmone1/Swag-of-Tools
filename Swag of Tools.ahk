@@ -1,4 +1,4 @@
-﻿SwagOfToolVer = 10 Oct 2020
+SwagOfToolVer = 02 Jan 2021
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -1290,6 +1290,13 @@ MCWS:
   WinHTTP.Send(Body)
   Result := WinHTTP.ResponseText
   Status := WinHTTP.Status
+
+  IfInString, Result, "No changes."
+	{
+	MsgLog = --- MC already has the same information for the above results ---`n%MsgLog%
+	Status = 200
+	}
+
 
   If Status = 200 
     Return
