@@ -1,4 +1,4 @@
-SwagOfToolVer = 02 Jan 2021
+SwagOfToolVer = 04 Jan 2021
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -752,6 +752,20 @@ ButtonMediaInfo:
            GuiControl,,Log, %MsgLog%
 		  }
 
+         If MC_FileExt = dvd;1
+		 {
+		   LargestFileSizeKB = 0
+		   Loop, %MC_FileNameExt%\*.IFO, , 1
+		   {
+		   IFOFileName := A_LoopFileFullPath
+		   runwait, %comspec% /c MediaInfo\MediaInfo.exe "%IFOFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
+		   MsgLog = Adding IFO file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+           GuiControl,,Log, %MsgLog%
+		   }
+		 }
+
+
+
 		 FileRead, MediaInfoOutput, %MC_FileName%_MediaInfo.txt
 
 		 If NoMediaInfoFile
@@ -795,9 +809,10 @@ ButtonMediaInfo:
 		   Else MsgLog = DTS:X track found and already in MC Compression Field`n%MsgLog%
 		   
 		 AllMediaInfoLanguage =
+		 Needle := "Language "
 		 Loop, Parse, MediaInfoOutput, `n, `r
 		 {
-		   StringGetPos, LangPos, A_LoopField,Language
+		   StringGetPos, LangPos, A_LoopField,%Needle% 
 		   If (LangPos = 0)
 		   {
 		     RegExMatch(A_LoopField,"(?=:)(.*)", MediaInfoLanguage)
