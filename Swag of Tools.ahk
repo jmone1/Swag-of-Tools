@@ -1,4 +1,4 @@
-SwagOfToolVer = 04 Jan 2021
+SwagOfToolVer = 17 Jan 2021
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -28,6 +28,8 @@ IniRead, MC_WS, Swag of Tools.ini,MC_Settings,MC_WS
 IniRead, MCFieldTarget, Swag of Tools.ini,MediaInfo_Settings,MCFieldTarget,%A_Space%
 IniRead, MediaInfoField, Swag of Tools.ini,MediaInfo_Settings,MediaInfoField,%A_Space%
 IniRead, MediaInfoSection, Swag of Tools.ini,MediaInfo_Settings,MediaInfoSection, %A_Space%
+IniRead, NoMediaInfoFile, Swag of Tools.ini,MediaInfo_Settings,NoMediaInfoFile,%A_Space%
+IniRead, SkipMediaInfoFile, Swag of Tools.ini,MediaInfo_Settings,SkipMediaInfoFile,%A_Space%
 EOLChar = {EOL}
 CRChar = {CR}
 LFChar = {LF}
@@ -214,8 +216,9 @@ Gui Show, w610 h440, Swag of Tools
   Gui, Add, Text,x360 y170,<--- Enter MediaInfo Data Field to collect
   Gui, Add, Edit, x220 y200 w130 h20 vMediaInfoSection, %MediaInfoSection%
   Gui, Add, Text,x360 y200,<--- Enter MediaInfo Section to restrict to
-  Gui, Add, Checkbox, x200 y230 vNoMediaInfoFile, Don't save MediaInfo output as an "Extra" File
-  Gui, Add, Button, x300 y260 gButtonMediaInfo, Get MediaInfo  
+  Gui, Add, Checkbox, x200 y230 vNoMediaInfoFile Checked%NoMediaInfoFile%, Don't save MediaInfo output as an "Extra" File
+  Gui, Add, Checkbox, x200 y260 vSkipMediaInfoFile Checked%SkipMediaInfoFile%, Don't overwrite existing MediaInfo "Extra" File
+  Gui, Add, Button, x300 y290 gButtonMediaInfo, Get MediaInfo  
 
 ; FilenameUpdater
   Gui Tab, 12
@@ -713,6 +716,8 @@ ButtonMediaInfo:
   IniWrite, %MCFieldTarget%, Swag of Tools.ini,MediaInfo_Settings,MCFieldTarget
   IniWrite, %MediaInfoField%, Swag of Tools.ini,MediaInfo_Settings,MediaInfoField
   IniWrite, %MediaInfoSection%, Swag of Tools.ini,MediaInfo_Settings,MediaInfoSection
+  IniWrite, %NoMediaInfoFile%, Swag of Tools.ini,MediaInfo_Settings,NoMediaInfoFile
+  IniWrite, %SkipMediaInfoFile%, Swag of Tools.ini,MediaInfo_Settings,SkipMediaInfoFile
   GuiControl,,Log, %MsgLog%
   Loop, parse, Result, `;
     If A_Index > 3
@@ -729,42 +734,41 @@ ButtonMediaInfo:
 		   RegExMatch(MC_FileNameExt,"(.*)(?=\\BDMV)", MC_FileNameExt)  ; keep this line
 		 If MC_FileExt = dvd;1
 		   RegExMatch(MC_FileNameExt,"(.*)(?=\\VIDEO_TS)", MC_FileNameExt)
-		   
-   		 Filedelete, %MC_FileName%_MediaInfo.txt
-		 runwait, %comspec% /c MediaInfo\MediaInfo.exe "%MC_FileNameExt%" >> "%MC_FileName%_MediaInfo.txt",, Hide
-		 MsgLog = Created Extra file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
-         GuiControl,,Log, %MsgLog%
 
-         If MC_FileExt = bluray;1
-		 {
-		   LargestFileSizeKB = 0
-		   Loop, %MC_FileNameExt%\BDMV\STREAM\*.M2TS, , 1
-		   {
-			If (A_LoopFileSizeKB > LargestFileSizeKB)
+		 If (SkipMediaInfoFile=0 || !FileExist(MC_FileName "_MediaInfo.txt"))
 			{
-			  M2TSFileName := A_LoopFileFullPath
-			  LargestFileSizeKB := A_LoopFileSizeKB
+			Filedelete, %MC_FileName%_MediaInfo.txt
+			runwait, %comspec% /c MediaInfo\MediaInfo.exe "%MC_FileNameExt%" >> "%MC_FileName%_MediaInfo.txt",, Hide
+			MsgLog = Created Extra file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+			GuiControl,,Log, %MsgLog%
+
+			If MC_FileExt = bluray;1
+				{
+				LargestFileSizeKB = 0
+				Loop, %MC_FileNameExt%\BDMV\STREAM\*.M2TS, , 1
+					{
+					If (A_LoopFileSizeKB > LargestFileSizeKB)
+						{
+						M2TSFileName := A_LoopFileFullPath
+						LargestFileSizeKB := A_LoopFileSizeKB
+						}
+					}
+				runwait, %comspec% /c MediaInfo\MediaInfo.exe "%M2TSFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
+				MsgLog = Adding Largest M2TS file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+				GuiControl,,Log, %MsgLog%
+				}
+
+			If MC_FileExt = dvd;1
+				{
+				Loop, %MC_FileNameExt%\*.IFO, , 1
+					{
+					IFOFileName := A_LoopFileFullPath
+					runwait, %comspec% /c MediaInfo\MediaInfo.exe "%IFOFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
+					MsgLog = Adding IFO file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+					GuiControl,,Log, %MsgLog%
+					}
+				}
 			}
-		   }
-
-		   runwait, %comspec% /c MediaInfo\MediaInfo.exe "%M2TSFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
-		   MsgLog = Adding Largest M2TS file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
-           GuiControl,,Log, %MsgLog%
-		  }
-
-         If MC_FileExt = dvd;1
-		 {
-		   LargestFileSizeKB = 0
-		   Loop, %MC_FileNameExt%\*.IFO, , 1
-		   {
-		   IFOFileName := A_LoopFileFullPath
-		   runwait, %comspec% /c MediaInfo\MediaInfo.exe "%IFOFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
-		   MsgLog = Adding IFO file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
-           GuiControl,,Log, %MsgLog%
-		   }
-		 }
-
-
 
 		 FileRead, MediaInfoOutput, %MC_FileName%_MediaInfo.txt
 
@@ -1207,7 +1211,12 @@ Return
 MC_GetInfo:
   MC_Call = http://%MC_WS%/MCWS/v1/File/GetInfo?File=%MC_Key%&Fields=Name,Playback Range,Filename,File Type,Compression,Language
   GoSub, MCWS
- 
+
+  ; UTF-8 Conversion - ???? if this should be in the main MCWS call
+  VarSetCapacity(tempVar := "", StrPut(Result, "CP1252"))
+  StrPut(Result, &tempVar, "CP1252")
+  Result := StrGet(&tempVar, "UTF-8")
+
   RegExMatch(Result,"(?<=Name"">)(.*)(?=</Field>)", MC_Name)
   RegExMatch(Result,"(?<=Range"">)(.*)(?=-)", MC_Start)
   RegExMatch(Result,"(?<=Filename"">)(.*)(?=[.])", MC_Filename)
@@ -1323,6 +1332,7 @@ MCWS:
 
   GuiControl,,Log, %MsgLog%
 Return
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;+++++++++ 3rd Party FUNCTIONS and SUBS +++++++++++++++++++++
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1567,9 +1577,9 @@ UUID()
 }
 ;=================== APP END ACTIONS ==========================
 ButtonCancel:
-Escape::
+; Escape::
 GuiClose:
-GuiEscape:
+; GuiEscape:
 Script_End:
 Gui, Hide
 FileDelete, temp.chapters.txt
