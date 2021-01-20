@@ -1,4 +1,4 @@
-SwagOfToolVer = 17 Jan 2021
+SwagOfToolVer = 20 Jan 2021
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -50,6 +50,7 @@ if !FileExist("Swag of Tools.ini")
 Gui Add, TreeView, gShowOptions x5 y12 w165 h260
 Gui Add, Button,x5 y310 cBlue gButtonClearLog, X
 Gui Add, Text,x35 y314, Clear Log of Events
+Gui Add, Checkbox, x170 y314 vVerboseLogging, Turn on Verbose Logging of MCWS Calls
 Gui Add, Edit, x5 y335 w595 h95 vLog
 Gui Add, Button, x5 y280 w167 h23 Default, &Cancel
 
@@ -1112,6 +1113,7 @@ Return
 Update_MC:
 
 AllToWrite =
+MC_Items_Updated = 0
 MC_Field_Num = 0
 Loop, parse, result, `n, `r
 {
@@ -1178,12 +1180,14 @@ Loop, parse, result, `n, `r
     StringReplace, MC_Call, MC_Call, `%0A, "`%0A", All ; Escape out LF
     StringReplace, MC_Call, MC_Call, `%0D""`%0A, `%0D`%0A, All ; Remove extra Escape out CR/LF (EOL Char)
     StringReplace, MC_Call, MC_Call, `%09, "`%09", All ; Escape out Tab	
-	
+	MC_Items_Updated := MC_Items_Updated + 1
     GoSub, MCWS
   }
   MC_Key =
 }
-MsgLog = Updated MC from the TXT File`n%MsgLog%
+MsgLog = Updated %MC_Items_Updated% items in MC from the TXT File`n%MsgLog%
+If MC_Items_Updated = 0
+	MsgLog = No Items were updated - Check you have a Col Heading called "Key"`n%MsgLog%
 GuiControl,,Log, %MsgLog%
 Return
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1321,7 +1325,12 @@ MCWS:
 	Status = 200
 	}
 
-
+  Gui, Submit, NoHide
+	If (VerboseLogging = 1)
+	{
+	MsgLog = MCWS Status - %Status%  MCWS Call and Result (see details below)`n%MC_Call%`n%Result%`n%MsgLog%
+	GuiControl,,Log, %MsgLog%
+	}
   If Status = 200 
     Return
   else If !Status
@@ -1329,7 +1338,6 @@ MCWS:
   else If Status = 401
     MsgLog = Error 401 Access Denied`n- Check Username / Password is correct in the Configuration Options`n%MsgLog%
   else MsgLog = Error - %Status%  Processed Failed (see details below)`n%MC_Call%`n%Result%`n%MsgLog%
-
   GuiControl,,Log, %MsgLog%
 Return
 
