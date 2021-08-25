@@ -1,4 +1,4 @@
-SwagOfToolVer = 20 Jan 2021
+﻿SwagOfToolVer = 25 Aug 2021 - Beta Version
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -30,6 +30,7 @@ IniRead, MediaInfoField, Swag of Tools.ini,MediaInfo_Settings,MediaInfoField,%A_
 IniRead, MediaInfoSection, Swag of Tools.ini,MediaInfo_Settings,MediaInfoSection, %A_Space%
 IniRead, NoMediaInfoFile, Swag of Tools.ini,MediaInfo_Settings,NoMediaInfoFile,%A_Space%
 IniRead, SkipMediaInfoFile, Swag of Tools.ini,MediaInfo_Settings,SkipMediaInfoFile,%A_Space%
+IniRead, CropScanPoint, Swag of Tools.ini,MediaInfo_Settings,CropScanPoint,%A_Space%
 EOLChar = {EOL}
 CRChar = {CR}
 LFChar = {LF}
@@ -74,8 +75,6 @@ If InputVar
   Gui Show, w610 h440, Swag of Tools
   MsgLog = The MC Runtime Command Received was : %InputVar%`n%MsgLog%
   GuiControl,,Log, %MsgLog%
-  If InputVar = Auto
-    gosub, ButtonAuto
   If InputVar = ReadChapterFile
     gosub, ButtonReadChapterFile
   If InputVar = CreateChapterFile
@@ -146,13 +145,14 @@ Gui Show, w610 h440, Swag of Tools
 
 ; Chapterfy ChapterDB Lookup
   Gui Tab, 4
-  Gui Add, GroupBox, x179 y7 w420 h300, Chapterfy ChapterDB Lookup
-  Gui, Add, Text,x189 y30, Chapterfy (Auto ChapterDB Lookup) : Select any ONE Bluray MPLS in MC to`n create Chapter Particles based on ChapterDB info
-  Gui, Add, Button,x280 y60 gButtonAuto, Auto Create Chapters (Only for Blu-ray MPLS)
-  Gui, Add, Text,x189 y90, Chapterfy (ChapterDB #) : Select any ONE item in MC to`n create Chapter Particles based on a specific ChapterDB #
-  Gui, Add, Button,x280 y125 gButtonChapterDBNum, Enter the ChapterDB # to use (Any Item in MC)
-  Gui, Add, Edit, x225 y125 w50 vAutoNum
-  Gui, Add, Link,x189 y180, Click the Link to Browse : <a href="http://www.chapterdb.org/">ChapterDB</a> 
+  Gui Add, GroupBox, x179 y7 w420 h300, Chapterfy ChapterDB (Lookup from Plex Archive) 
+  Gui, Add, Text,x189 y30, While the ChapterDB site has been decommissioned,there is still a Read Only Archive `nat Plex for chatper information up to that point that can still be accessed `nBrowse the Archive and note the # at the end of the URL for that chapter file`nsuch as "18" in https://chapterdb.plex.tv/browse/18 
+  Gui, Add, Link,x189 y90, Click the Link to Browse : <a href="https://chapterdb.plex.tv/browse">ChapterDB</a> 
+;  Gui, Add, Button,x280 y60 gButtonAuto, Auto Create Chapters (Only for Blu-ray MPLS)
+  Gui, Add, Text,x189 y120, Select any ONE item in MC to`ncreate Chapter Particles based on a specific ChapterDB #
+  Gui, Add, Button,x280 y155 gButtonChapterDBNum, Enter the ChapterDB # to use (Any Item in MC)
+  Gui, Add, Edit, x225 y155 w50 vAutoNum
+
 
 ; Chapterfy Read Blu-ray MPLS
   Gui Tab, 5
@@ -206,20 +206,19 @@ Gui Show, w610 h440, Swag of Tools
 
 ; MediaInfo
   Gui Tab, 11
-  Gui Add, GroupBox, x179 y7 w420 h300, MediaInfo
-  Gui, Add, Text,x189 y30, Select One or more items to run MediaInfo on and it will:
-  Gui, Add, Text,,- Adds the MediaInfo output as an "Extra" for the selected file(s)
-  Gui, Add, Text,,- Saves Atmos / DTS:X Codec information to the Compression Field
-  Gui, Add, Text,,- Optionally add info from MediaInfo to a Media Center Field
-  Gui, Add, Edit, x220 y140 w130 h20 vMCFieldTarget, %MCFieldTarget%
-  Gui, Add, Text,x360 y140,<--- Enter the Field in MC to Update
-  Gui, Add, Edit, x220 y170 w130 h20 vMediaInfoField, %MediaInfoField%
-  Gui, Add, Text,x360 y170,<--- Enter MediaInfo Data Field to collect
-  Gui, Add, Edit, x220 y200 w130 h20 vMediaInfoSection, %MediaInfoSection%
-  Gui, Add, Text,x360 y200,<--- Enter MediaInfo Section to restrict to
-  Gui, Add, Checkbox, x200 y230 vNoMediaInfoFile Checked%NoMediaInfoFile%, Don't save MediaInfo output as an "Extra" File
-  Gui, Add, Checkbox, x200 y260 vSkipMediaInfoFile Checked%SkipMediaInfoFile%, Don't overwrite existing MediaInfo "Extra" File
-  Gui, Add, Button, x300 y290 gButtonMediaInfo, Get MediaInfo  
+  Gui Add, GroupBox, x179 y7 w420 h300, MediaInfo and FFMpeg
+  Gui, Add, Text,x189 y30, Select One or more items to run MediaInfo / FFMpeg on and it will: `n- Adds the MediaInfo output as an "Extra" for the selected file(s) `n- Saves Atmos / DTS:X Codec information to the Compression Field `n- Optionally add info from MediaInfo to a Media Center Field
+  Gui, Add, Edit, x220 y90 w130 h20 vMCFieldTarget, %MCFieldTarget%
+  Gui, Add, Text,x360 y90,<--- Enter the Field in MC to Update
+  Gui, Add, Edit, x220 y120 w130 h20 vMediaInfoField, %MediaInfoField%
+  Gui, Add, Text,x360 y120,<--- Enter MediaInfo Data Field to collect
+  Gui, Add, Edit, x220 y150 w130 h20 vMediaInfoSection, %MediaInfoSection%
+  Gui, Add, Text,x360 y150,<--- Enter MediaInfo Section to restrict to
+  Gui, Add, Checkbox, x200 y180 vNoMediaInfoFile Checked%NoMediaInfoFile%, Don't save MediaInfo output as an "Extra" File
+  Gui, Add, Checkbox, x200 y200 vSkipMediaInfoFile Checked%SkipMediaInfoFile%, Don't overwrite existing MediaInfo "Extra" File
+  Gui, Add, Edit, x220 y230 w130 h20 vCropScanPoint, %CropScanPoint%
+  Gui, Add, Text,x360 y230,<--- Enter Secs into video to measure Crop Factor`n         (leave blank or 0 to disable)
+  Gui, Add, Button, x300 y270 gButtonMediaInfo, Get MediaInfo  
 
 ; FilenameUpdater
   Gui Tab, 12
@@ -373,11 +372,11 @@ return
 
 ButtonChapterDBNum:
   guiControlGet, AutoNum
-  If AutoNum > 0   ; Get by chapterDB #
+  If AutoNum > 0   ; Get by chapterDB # from Plex backup
   {
   	MsgLog = Checking for chapterDB #%AutoNum%, Please Wait
     GuiControl,,Log, %MsgLog%
-    urldownloadtofile, http://www.chapterdb.org/Home/Download/%AutoNum%?type=txt, temp.chapters.txt
+    urldownloadtofile, https://chapterdb.plex.tv/browse/%AutoNum%.txt, temp.chapters.txt
     gosub, MC_Current
     gosub, Process_Chapters
   }
@@ -388,6 +387,7 @@ ButtonChapterDBNum:
   }
 return
 
+/* ******  http://www.chapterdb.org has been taken down so this function no longer works 
 ButtonAuto:
   Gui, Submit, NoHide
   guiControlGet, UserInput
@@ -422,6 +422,7 @@ ButtonAuto:
     GuiControl,,Log, %MsgLog%
   }
 return
+*/
 
 ButtonReadMPLS:
   guiControlGet, UserInput
@@ -523,7 +524,8 @@ ButtonCreateChapterFile:
   {
     MC_Key := MC_Chapters%A_Index%
     GoSub, MC_GetInfo
-    StringReplace, MC_Name, MC_Name, &amp;, &
+    ;StringReplace, MC_Name, MC_Name, &amp;, &  This call has been depricated need to test following
+	MC_Name := StrReplace(MC_Name,"&amp;","&")
     Chap_N = %A_Index%
     If A_Index < 10
       Chap_N = 0%A_Index%
@@ -547,7 +549,6 @@ ButtonReadInfoAll:
   sleep, 100
   URLDownloadToFile, http://%MC_UserName%:%MC_Password%@%MC_WS%/MCWS/v1/Files/Search?Action=mpl&ActiveFile=-1&Zone=-1&ZoneType=ID, %MPLFileName%
   OutputFileName = MC_Output_%A_Now%.txt
-  Fileread,result, %MPLFileName%
   gosub, Process_MPL
 return
 
@@ -558,7 +559,6 @@ ButtonReadInfo:
   sleep, 100
   URLDownloadToFile, http://%MC_UserName%:%MC_Password%@%MC_WS%/MCWS/v1/Files/Current?Action=mpl&ActiveFile=-1&Zone=-1&ZoneType=ID, %MPLFileName%
   OutputFileName = MC_Output_%A_Now%.txt
-  Fileread,result, %MPLFileName%
   gosub, Process_MPL
 return
 
@@ -573,7 +573,6 @@ ButtonOpenMPL:
   }
   SplitPath, SelectedFile,,,,OutputFileName
   OutputFileName = %OutputFileName%.txt
-  Fileread,result, %SelectedFile%
   gosub, Process_MPL
 return
 
@@ -708,6 +707,26 @@ ButtonMediaInfo:
 	 Else
 	   return
   }
+  IfNotExist, %A_ScriptDir%\ffmpeg\ffmpeg-N-102631-gbaf5cc5b7a-win64-gpl-shared\bin\ffmpeg.exe
+  {
+     MsgBox, 1,, FFmpeg is missing.  Download Now or Cancel?
+	 IfMsgBox OK
+	 {
+	   MC_Call = https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-05-31-13-09/ffmpeg-N-102631-gbaf5cc5b7a-win64-gpl-shared.zip
+       Source = %A_ScriptDir%\ffmpeg-N-102545-g59032494e8-win64-gpl-shared.zip
+       Dest = %A_ScriptDir%\ffmpeg
+       FileCreateDir, %A_ScriptDir%\ffmpeg
+	   DownloadFile(MC_Call,Source, True, True)
+       Unz(Source, Dest)
+       FileDelete, %A_ScriptDir%\ffmpeg-N-102545-g59032494e8-win64-gpl-shared.zip
+       FileAppend,
+	   MsgLog = Completed - Please check for any errors....`n%MsgLog%  
+       GuiControl,,Log, %MsgLog%
+     }
+	 Else
+	   return
+  }
+
 
   MC_Call = http://%MC_WS%/MCWS/v1/Files/Current?Action=Serialize
   GoSub, MCWS
@@ -719,6 +738,7 @@ ButtonMediaInfo:
   IniWrite, %MediaInfoSection%, Swag of Tools.ini,MediaInfo_Settings,MediaInfoSection
   IniWrite, %NoMediaInfoFile%, Swag of Tools.ini,MediaInfo_Settings,NoMediaInfoFile
   IniWrite, %SkipMediaInfoFile%, Swag of Tools.ini,MediaInfo_Settings,SkipMediaInfoFile
+  IniWrite, %CropScanPoint%, Swag of Tools.ini,MediaInfo_Settings,CropScanPoint
   GuiControl,,Log, %MsgLog%
   Loop, parse, Result, `;
     If A_Index > 3
@@ -785,9 +805,8 @@ ButtonMediaInfo:
 		   {
 		    MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Compression&Value=%MC_Compression%+Atmos
             GoSub, MCWS
-            If Status !=200
-             return
-		 	MsgLog = Atmos track found and MC Compression Field Updated`n%MsgLog%
+            If Status =200
+				MsgLog = Atmos track found and MC Compression Field Updated`n%MsgLog%
 		   }
 		   Else MsgLog = Atmos track found and already in MC Compression Field`n%MsgLog%
 		   
@@ -796,9 +815,8 @@ ButtonMediaInfo:
 		   {
 		    MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Compression&Value=%MC_Compression%+DTS:X
             GoSub, MCWS
-            If Status !=200
-             return
-		 	MsgLog = DTS:X track found and MC Compression Field Updated`n%MsgLog%
+            If Status =200
+				MsgLog = DTS:X track found and MC Compression Field Updated`n%MsgLog%
 		   }
 		   Else MsgLog = DTS:X track found and already in MC Compression Field`n%MsgLog%
 		   
@@ -807,9 +825,8 @@ ButtonMediaInfo:
 		   {
 		    MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Compression&Value=%MC_Compression%+DTS:X
             GoSub, MCWS
-            If Status !=200
-             return
-		 	MsgLog = DTS:X track found and MC Compression Field Updated`n%MsgLog%
+            If Status =200
+				MsgLog = DTS:X track found and MC Compression Field Updated`n%MsgLog%
 		   }
 		   Else MsgLog = DTS:X track found and already in MC Compression Field`n%MsgLog%
 		   
@@ -821,24 +838,28 @@ ButtonMediaInfo:
 		   If (LangPos = 0)
 		   {
 		     RegExMatch(A_LoopField,"(?=:)(.*)", MediaInfoLanguage)
-		     StringTrimLeft, MediaInfoLanguage, MediaInfoLanguage, 2
-			 IfNotInString, AllMediaInfoLanguage, %MediaInfoLanguage%
- 		       AllMediaInfoLanguage = %AllMediaInfoLanguage%; %MediaInfoLanguage%
+		     StringTrimLeft,MediaInfoLanguage,MediaInfoLanguage,2
+			 IfNotInString,MC_Language,%MediaInfoLanguage%
+			   IfNotInString,AllMediaInfoLanguage,%MediaInfoLanguage%
+ 		         AllMediaInfoLanguage = %AllMediaInfoLanguage%;%MediaInfoLanguage%
 		   }
 		 }
 
 		 If AllMediaInfoLanguage
 		 {
-           StringReplace, AllMediaInfoLanguage, AllMediaInfoLanguage,:,;, All
-		   StringReplace, AllMediaInfoLanguage, AllMediaInfoLanguage,/,;, All
-		   MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Language&Value=%MC_Language%%AllMediaInfoLanguage%
-           GoSub, MCWS
-           If Status !=200
-             return
-		   MsgLog = Language track info found and MC Language Field Updated`n%MsgLog%
+;			StringReplace, AllMediaInfoLanguage, AllMediaInfoLanguage,:,;, All - No longer needed?
+;			StringReplace, AllMediaInfoLanguage, AllMediaInfoLanguage,/,;, All - No longer needed?
+			AllMediaInfoLanguage = %MC_Language%%AllMediaInfoLanguage%
+			Needle2 := ";"
+			FoundPos := InStr(AllMediaInfoLanguage,Needle2)
+			If (FoundPos = 1)
+			  AllMediaInfoLanguage := SubStr(AllMediaInfoLanguage,2)
+
+			MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Language&Value=%AllMediaInfoLanguage%
+			GoSub, MCWS
+			If Status =200
+				MsgLog = Language track info found and MC Language Field Updated`n%MsgLog%
 		 }
-
-
 
 		If MCFieldTarget
 		{
@@ -854,13 +875,20 @@ ButtonMediaInfo:
 				RegExMatch(Result,"(?<=MCFieldTargetCurrent"">)(.*)(?=</Field>)", AllMediaInfoValue)
 				Loop, Parse, MediaInfoOutput, `n, `r
 				{
-					if (A_LoopField = "")
+					StringLeft, MediaInfoFieldName, A_LoopField, 40
+					MediaInfoFieldName = %MediaInfoFieldName%
+
+					If (A_LoopField = "")
 						MediaInfoSectionFound = 0
+
 					StringGetPos, SectionPos, A_LoopField,%MediaInfoSectionCurrent%
+
 					If (SectionPos = 0)
 						MediaInfoSectionFound = 1
+
 					StringGetPos, FieldPos, A_LoopField,%MediaInfoFieldCurrent%
-					If ((FieldPos = 0) and ((MediaInfoSectionFound = 1) or (MediaInfoSectionCurrent = "")))
+
+					If ((MediaInfoFieldName == MediaInfoFieldCurrent) and ((MediaInfoSectionFound = 1) or (MediaInfoSectionCurrent = "")))
 					{
 						RegExMatch(A_LoopField,"(?=:)(.*)", MediaInfoValue)
 						StringTrimLeft, MediaInfoValue, MediaInfoValue, 2
@@ -868,22 +896,76 @@ ButtonMediaInfo:
 						AllMediaInfoValue = %AllMediaInfoValue%; %MediaInfoValue%
 					}
 				}
+
 					If AllMediaInfoValue
 					{
-						StringReplace, AllMediaInfoValue, AllMediaInfoValue,:,;, All
-						StringReplace, AllMediaInfoValue, AllMediaInfoValue,/,;, All
 						StringGetPos, SectionPos, AllMediaInfoValue,;%Space%
 						If (SectionPos = 0)
 							StringTrimLeft, AllMediaInfoValue, AllMediaInfoValue,2
-						MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=%MCFieldTargetCurrent%&Value=%AllMediaInfoValue%
-						GoSub, MCWS
-						If Status !=200
-							return
-						MsgLog = MC %MCFieldTargetCurrent% updated with %AllMediaInfoValue%`n%MsgLog%
-					}
 
+;						StringReplace, AllMediaInfoValue, AllMediaInfoValue,:,;, All
+;						StringReplace, AllMediaInfoValue, AllMediaInfoValue,/,;, All
+						MCFieldTargetCurrentClean = % UriEncode(MCFieldTargetCurrent)
+						AllMediaInfoValueClean = % UriEncode(AllMediaInfoValue)
+
+						MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=%MCFieldTargetCurrentClean%&Value=%AllMediaInfoValueClean%
+						GoSub, MCWS
+						If Status =200
+							MsgLog = MC %MCFieldTargetCurrent% updated with %AllMediaInfoValue%`n%MsgLog%
+					}
 			}
 		}
+; FFMpeg section to scan for CropScanPoint
+		CropScanPointNow := CropScanPoint
+		If (CropScanPointNow > 0)
+		{
+			FileDelete, ffmpeg.txt
+			Crop :=
+
+			If (CropScanPointNow > MC_Duration)
+			{
+				MsgLog = Warning, The Crop Scan Point of %CropScanPointNow% sec is greater than the Duration of the Video (%MC_Duration% sec) `n%MsgLog%
+				GuiControl,,Log, %MsgLog%
+				CropScanPointNow = 1
+			}
+
+
+			MsgLog = Determining the Crop Factor for "%MC_FileName%" at the %CropScanPointNow% sec mark`n%MsgLog%
+			GuiControl,,Log, %MsgLog%
+
+			If MC_FileExt = bluray;1
+				MC_FileNameExt := M2TSFileName
+
+			If MC_FileExt = dvd;1
+			{
+				LargestFileSizeKB = 0
+				Loop, %MC_FileNameExt%\*.VOB, , 1
+					{
+						If (A_LoopFileSizeKB > LargestFileSizeKB)
+						{
+							VOBFileName := A_LoopFileFullPath
+							LargestFileSizeKB := A_LoopFileSizeKB
+						}
+					}
+				MC_FileNameExt := VOBFileName
+			}
+			runwait, %comspec% /c ffmpeg\ffmpeg-N-102631-gbaf5cc5b7a-win64-gpl-shared\bin\ffmpeg.exe -ss %CropScanPointNow% -i "%MC_FileNameExt%" -t 10 -vf cropdetect -f null dummy > ffmpeg.txt 2>&1,, Hide
+
+			loop, Read, ffmpeg.txt
+			{
+				if InStr(A_LoopReadLine, "crop=")
+				{
+					FoundPos := InStr(A_LoopReadLine, "crop=")+5
+					Crop := SubStr(A_LoopReadLine,FoundPos)
+				}
+			}
+
+			MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Crop&Value=%Crop%
+			GoSub, MCWS
+			If Status =200
+				MsgLog = The Crop Factor for "%MC_FileName%" is %Crop%`n%MsgLog%
+		}
+; End FFMpeg Section
 		}
 		GuiControl,,Log, %MsgLog%   
 	}
@@ -1021,90 +1103,39 @@ Return
 
 ;------------ Convert MPL to TXT File --------------------
 Process_MPL:
-
-IfInString, result, %EOLChar%
-  {
-   MsgLog = Warning the Library contains the String %EOLChar% and output may not be correctly processed`n%MsgLog%
-   GuiControl,,Log, %MsgLog%
-  }
-
 MsgLog = Preparing MPL File, Please Wait`n%MsgLog%
 GuiControl,,Log, %MsgLog%
-
-StringReplace, result, result, >`r`n, %EOLChar%, All
-StringReplace, result, result, `r, %CRChar%, All
-StringReplace, result, result, `n, %LFChar%, All
-StringReplace, result, result, %A_Tab%, %TabChar%, All
-StringReplace, result, result, &amp;, &, All ; this may be a bug in MC
-StringReplace, result, result, %EOLChar%, >`r`n, All ; mark real end of line
-
-MC_Field_Num = -1
-Loop, parse, result, `r, `n
-{
-  RegExMatch(A_LoopField,"(?<=Name="")(.*)(?="">)", MC_Field_Name)
-  numlines++
-
-  IfNotInString, MC_Field_Header, <%MC_Field_Name%>
-  {
-    MC_Field_Header = %MC_Field_Header%%A_Tab%<%MC_Field_Name%> ; For checking in in string
-    MC_Field_Header2 = %MC_Field_Header2%%A_Tab%%MC_Field_Name% ; No < or > for writting to the file
-    MC_Field_Num += 1
-    MC_Field_List%MC_Field_Num% := MC_Field_Name
-  }
+; ----------------------------------------------------------------------------------------------------------------------
+XML_Obj := ComObjCreate("Msxml2.DOMDocument.6.0")
+XML_Obj.setProperty("SelectionLanguage", "XPath")
+XML_Obj.async := False
+XML_Path = %MPLFileName%
+XML_Obj.load(XML_Path)
+XML_Doc := XML_Obj.documentElement
+; ----------------------------------------------------------------------------------------------------------------------
+NamesArr := {}
+For Node In XML_Doc.selectNodes("Item/Field/@Name")
+   NamesArr[Node.Value] := ""
+NamesCount := NamesArr.Count()
+; ----------------------------------------------------------------------------------------------------------------------
+ResultStr := ""
+For Name In NamesArr
+   ResultStr .= Name . (A_Index < NamesCount ? "`t" : "")
+For Item In XML_Doc.selectNodes("Item") {
+   TextStr := ""
+   For Name In NamesArr {
+      Txt := Item.selectSingleNode("Field[@Name='" . Name . "']").text
+      TextStr .= Txt . (A_Index < NamesCount ? "`t" : "")
+   }
+   GuiControl,,Log, Processing Item %A_Index% `n%MsgLog%
+   
+   ; --------- Swap out Special Chars that break the TXT File ----------
+   StringReplace, TextStr, TextStr, `n, {LF}, All
+   ResultStr .= "`n" . TextStr
 }
 
-FileAppend, %MC_Field_Header2%`n, %OutputFileName%, UTF-16
+FileAppend, %ResultStr%, %OutputFileName%, UTF-16
 
-Loop, parse, result, `r , `n
-{
-  L_Progress := Floor(A_Index/numlines*100)
-  If (L_Progress<>L_Progress_Last)
-  {
-    GuiControl,,Log, Writing %OutputFileName% - %L_Progress%`%`n%MsgLog%
-	L_Progress_Last := L_Progress
-  }
-
-  IfInString, A_LoopField, <Item>
-  {
-    Loop, %MC_Field_Num%
-      MC_Field_Data%A_Index% = {EmptyField}
-  }
-
-  IfInString, A_LoopField, <Field Name="
-  {
-    RegExMatch(A_LoopField,"(?<=Name="")(.*)(?="">)", MC_Field_Name)
-    RegExMatch(A_LoopField,"(?<="">)(.*)(?=</Field)", MC_Value)
-    Loop, %MC_Field_Num%
-    {
-      TempVar := MC_Field_List%A_Index%
-      IF (TempVar = MC_Field_Name)
-      {
-        MC_Field_Data%A_Index% = %MC_Value%
-        Break
-      }
-    }
-  }
-
-  IfInString, A_LoopField, </Item>
-  {
-    DataToWrite =
-    LineToWrite =
-    Loop, %MC_Field_Num%
-    {
-       DataToWrite := MC_Field_Data%A_Index%
-       LineToWrite = %LineToWrite%%A_Tab%%DataToWrite%
-    }
-     AllToWrite = %AllToWrite%%LineToWrite%`n
-  }
-  If !(Mod(A_Index,10000)) ; wite files in chuncks so to not run out of memory but keep file writes low
-  {
-    StringReplace, AllToWrite, AllToWrite, {EmptyField}, %Tab%, All
-    FileAppend, %AllToWrite%, %OutputFileName%
-    AllToWrite =
-  }
-}
-StringReplace, AllToWrite, AllToWrite, {EmptyField}, %Tab%, All
-FileAppend, %AllToWrite%, %OutputFileName%
 MsgLog = Created %OutputFileName%`n%MsgLog%
 GuiControl,,Log, %MsgLog%
 Return
@@ -1112,6 +1143,7 @@ Return
 ;------------ Update MC from TXT File --------------------
 Update_MC:
 
+MC_Field_Data := ""
 AllToWrite =
 MC_Items_Updated = 0
 MC_Field_Num = 0
@@ -1124,15 +1156,11 @@ Loop, parse, result, `n, `r
 
 Loop, parse, result, `n, `r
 {
-  L_Progress := A_Index/numlines*100
-
   If A_Index = 1 ; Skip first header line
     Continue
-  If (L_Progress<>L_Progress_Last)
-  {
-    GuiControl,,Log, Updating MC - %L_Progress%`%`n%MsgLog%
-	L_Progress_Last := L_Progress
-  }
+
+  GuiControl,,Log, Processing Row %A_Index% of the TXT File `n%MsgLog%
+
   StringSplit, MC_Field_Data, A_Loopfield, %A_Tab%
 
   FieldsToWrite = http://%MC_WS%/MCWS/v1/File/SetInfo?File=&FileType=Key&Field=ZNoField
@@ -1142,7 +1170,6 @@ Loop, parse, result, `n, `r
   {
     tempField := MC_Field_Headers%a_index%
     tempData := MC_Field_Data%a_index% 
-
     ; find key
     if tempField = Key
     {
@@ -1207,19 +1234,13 @@ MC_Current:
     return
     }
   RegExMatch(Result,"(?<=-1;)(.*)", Result)
-;  RegExMatch(Result,"(?<=-1;)(?=</Field>)", Result)
   StringSplit, MC_Chapters, Result, ';
 Return
 
 ;------------ MC Get Details with an Key-----------------
 MC_GetInfo:
-  MC_Call = http://%MC_WS%/MCWS/v1/File/GetInfo?File=%MC_Key%&Fields=Name,Playback Range,Filename,File Type,Compression,Language
+  MC_Call = http://%MC_WS%/MCWS/v1/File/GetInfo?File=%MC_Key%&Fields=Name,Playback Range,Filename,File Type,Compression,Language,Duration
   GoSub, MCWS
-
-  ; UTF-8 Conversion - ???? if this should be in the main MCWS call
-  VarSetCapacity(tempVar := "", StrPut(Result, "CP1252"))
-  StrPut(Result, &tempVar, "CP1252")
-  Result := StrGet(&tempVar, "UTF-8")
 
   RegExMatch(Result,"(?<=Name"">)(.*)(?=</Field>)", MC_Name)
   RegExMatch(Result,"(?<=Range"">)(.*)(?=-)", MC_Start)
@@ -1228,6 +1249,7 @@ MC_GetInfo:
   RegExMatch(Result,"(?<=Type"">)(.*)(?=</Field>)", MC_FileType)
   RegExMatch(Result,"(?<=Compression"">)(.*)(?=</Field>)", MC_Compression)
   RegExMatch(Result,"(?<=Language"">)(.*)(?=</Field>)", MC_Language)
+  RegExMatch(Result,"(?<=Duration"">)(.*)(?=</Field>)", MC_Duration)
   StringTrimLeft, MC_FileExt, MC_FilenameExt, StrLen(MC_Filename)+1
 Return
 
@@ -1252,6 +1274,7 @@ ButtonTestMCWS:
     GuiControl,,Log, %MsgLog%
 	}
 Return
+
 ;---------- Make INI and Registry Changes ----------------
 ButtonSaveMCWS:
   Gui, Submit, NoHide
@@ -1282,20 +1305,33 @@ ButtonSaveMCWS:
   MC_Call = http://%MC_WS%/MCWS/v1/Library/Fields
   GoSub, MCWS
 
-  MsgLog = Check if "ChapterDB #" Field already exists in MC Library`n%MsgLog%
+  MC_Fields := Result
+
+  MsgLog = Check if "Crop" Field already exists in MC Library`n%MsgLog%
   GuiControl,,Log, %MsgLog%
-  IfInString, Result, ChapterDB
-    MsgLog = "ChapterDB #" Field already exists in MC Library`n%MsgLog%
+  IfInString, MC_Fields, Crop
+    MsgLog = "Crop" Field already exists in MC Library`n%MsgLog%
   Else
 	{  
-    MC_Call = http://%MC_WS%/MCWS/v1/Library/CreateField?Name=ChapterDB #&Type=string
-    MsgLog = Adding "ChapterDB #" Field to MC Library`n%MsgLog%
+    MC_Call = http://%MC_WS%/MCWS/v1/Library/CreateField?Name=Crop&Type=string
+    MsgLog = Adding "Crop" Field to MC Library`n%MsgLog%
+    GoSub, MCWS
+    }
+
+  MsgLog = Check if "Aspect Ratio (Crop)" Field already exists in MC Library`n%MsgLog%
+  GuiControl,,Log, %MsgLog%
+  IfInString, MC_Fields, Aspect Ratio (Crop)
+    MsgLog = "Aspect Ratio (Crop)" Field already exists in MC Library`n%MsgLog%
+  Else
+	{  
+    MC_Call = http://%MC_WS%/MCWS/v1/Library/CreateField?Name=Aspect Ratio (Crop)&Expression=save(ifelse(not(isempty([crop])), Math(ListItem([Crop],0,:)//ListItem([Crop],1,:)),not(isempty([Aspect Ratio])), Math(Replace([Aspect Ratio],:,//)),1,Math(Replace([Dimensions],x,//))),v_ARCalculated)IfCase(Replace([v_ARCalculated],/,,.), 3, 0.30, unknown, 0.9, portrait, 1.17, 1.00, 1.5, 1.33, 1.72, 1.66, 1.82, 1.78, 1.93, 1.85, 2.1, 2.00, 2.28, 2.20, 2.37, 2.35, 2.47, 2.39, 2.6, 2.55, 2.71, 2.65, 2.99, 2.76, 20, wide)
+    MsgLog = Adding "Aspect Ratio (Crop)" Field to MC Library`n%MsgLog%
     GoSub, MCWS
     }
 
   MsgLog = Check if "FileKey" Field already exists in MC Library`n%MsgLog%
   GuiControl,,Log, %MsgLog%
-  IfInString, Result, FileKey
+  IfInString, MC_Fields, FileKey
     MsgLog = "FileKey" Field already exists in MC Library`n%MsgLog%
   Else
 	{  
@@ -1304,20 +1340,23 @@ ButtonSaveMCWS:
     GoSub, MCWS
     }
 
-
     GuiControl,,Log, %MsgLog%
 	Return
+
 ;-------------MCWS---------------------------
 MCWS:
   WinHTTP := ComObjCreate("WinHTTP.WinHttpRequest.5.1")
   ComObjError(false)
   WinHTTP.Open("GET", MC_Call)
   WinHTTP.SetCredentials(MC_UserName,MC_Password,0)
-  WinHTTP.SetRequestHeader("Content-type", "application/x-www-form-urlencoded")
+  WinHTTP.SetRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
   Body = ""
   WinHTTP.Send(Body)
   Result := WinHTTP.ResponseText
   Status := WinHTTP.Status
+
+  Result := BinArr_ToString(WinHTTP.ResponseBody, "UTF-8")
+  Result := StrReplace(Result,"&amp;","&")
 
   IfInString, Result, "No changes."
 	{
@@ -1361,6 +1400,19 @@ Return
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;+++++++++ GENERAL FUNCTIONS and SUBS +++++++++++++++++++++++
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+; ---------------UTF-8 Encoding-------------------------
+; Thanks to mikeyww at - https://www.autohotkey.com/boards/viewtopic.php?t=87449&p=384631
+BinArr_ToString(BinArr, Encoding := "UTF-8") {
+ ; https://gist.github.com/tmplinshi/a97d9a99b9aa5a65fd20
+ ; https://www.autohotkey.com/boards/viewtopic.php?p=100984#p100984
+ oADO := ComObjCreate("ADODB.Stream"), oADO.Type := 1, oADO.Mode := 3 ; adTypeBinary, adModeReadWrite
+ oADO.Open
+ oADO.Write(BinArr)
+ oADO.Position := 0, oADO.Type := 2, oADO.Charset := Encoding ; adTypeText
+ Return oADO.ReadText, oADO.Close
+}
+
 ; ----------Unzip -------------------------------
 Unz(sZip, sUnz)
 {
@@ -1585,9 +1637,7 @@ UUID()
 }
 ;=================== APP END ACTIONS ==========================
 ButtonCancel:
-; Escape::
 GuiClose:
-; GuiEscape:
 Script_End:
 Gui, Hide
 FileDelete, temp.chapters.txt
