@@ -1,4 +1,4 @@
-﻿SwagOfToolVer = 25 Aug 2021 - Beta Version
+SwagOfToolVer = 29 March 2022
 ; Author: jmone Thread on Interact: http://yabb.jriver.com/interact/index.php/topic,106802.0.html
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -31,6 +31,7 @@ IniRead, MediaInfoSection, Swag of Tools.ini,MediaInfo_Settings,MediaInfoSection
 IniRead, NoMediaInfoFile, Swag of Tools.ini,MediaInfo_Settings,NoMediaInfoFile,%A_Space%
 IniRead, SkipMediaInfoFile, Swag of Tools.ini,MediaInfo_Settings,SkipMediaInfoFile,%A_Space%
 IniRead, CropScanPoint, Swag of Tools.ini,MediaInfo_Settings,CropScanPoint,%A_Space%
+IniRead, CropSettings, Swag of Tools.ini,MediaInfo_Settings,CropSettings,%A_Space%
 EOLChar = {EOL}
 CRChar = {CR}
 LFChar = {LF}
@@ -148,7 +149,6 @@ Gui Show, w610 h440, Swag of Tools
   Gui Add, GroupBox, x179 y7 w420 h300, Chapterfy ChapterDB (Lookup from Plex Archive) 
   Gui, Add, Text,x189 y30, While the ChapterDB site has been decommissioned,there is still a Read Only Archive `nat Plex for chatper information up to that point that can still be accessed `nBrowse the Archive and note the # at the end of the URL for that chapter file`nsuch as "18" in https://chapterdb.plex.tv/browse/18 
   Gui, Add, Link,x189 y90, Click the Link to Browse : <a href="https://chapterdb.plex.tv/browse">ChapterDB</a> 
-;  Gui, Add, Button,x280 y60 gButtonAuto, Auto Create Chapters (Only for Blu-ray MPLS)
   Gui, Add, Text,x189 y120, Select any ONE item in MC to`ncreate Chapter Particles based on a specific ChapterDB #
   Gui, Add, Button,x280 y155 gButtonChapterDBNum, Enter the ChapterDB # to use (Any Item in MC)
   Gui, Add, Edit, x225 y155 w50 vAutoNum
@@ -208,24 +208,30 @@ Gui Show, w610 h440, Swag of Tools
   Gui Tab, 11
   Gui Add, GroupBox, x179 y7 w420 h300, MediaInfo and FFMpeg
   Gui, Add, Text,x189 y30, Select One or more items to run MediaInfo / FFMpeg on and it will: `n- Adds the MediaInfo output as an "Extra" for the selected file(s) `n- Saves Atmos / DTS:X Codec information to the Compression Field `n- Optionally add info from MediaInfo to a Media Center Field
-  Gui, Add, Edit, x220 y90 w130 h20 vMCFieldTarget, %MCFieldTarget%
-  Gui, Add, Text,x360 y90,<--- Enter the Field in MC to Update
-  Gui, Add, Edit, x220 y120 w130 h20 vMediaInfoField, %MediaInfoField%
-  Gui, Add, Text,x360 y120,<--- Enter MediaInfo Data Field to collect
-  Gui, Add, Edit, x220 y150 w130 h20 vMediaInfoSection, %MediaInfoSection%
-  Gui, Add, Text,x360 y150,<--- Enter MediaInfo Section to restrict to
-  Gui, Add, Checkbox, x200 y180 vNoMediaInfoFile Checked%NoMediaInfoFile%, Don't save MediaInfo output as an "Extra" File
-  Gui, Add, Checkbox, x200 y200 vSkipMediaInfoFile Checked%SkipMediaInfoFile%, Don't overwrite existing MediaInfo "Extra" File
-  Gui, Add, Edit, x220 y230 w130 h20 vCropScanPoint, %CropScanPoint%
-  Gui, Add, Text,x360 y230,<--- Enter Secs into video to measure Crop Factor`n         (leave blank or 0 to disable)
-  Gui, Add, Button, x300 y270 gButtonMediaInfo, Get MediaInfo  
+  Gui, Add, Edit, x220 y85 w130 h20 vMCFieldTarget, %MCFieldTarget%
+  Gui, Add, Text,x360 y85,<--- Enter the Field in MC to Update
+  Gui, Add, Edit, x220 y110 w130 h20 vMediaInfoField, %MediaInfoField%
+  Gui, Add, Text,x360 y110,<--- Enter MediaInfo Data Field to collect
+  Gui, Add, Edit, x220 y135 w130 h20 vMediaInfoSection, %MediaInfoSection%
+  Gui, Add, Text,x360 y135,<--- Enter MediaInfo Section to restrict to
+  Gui, Add, Checkbox, x200 y160 vNoMediaInfoFile Checked%NoMediaInfoFile%, Don't save MediaInfo output as an "Extra" File
+  Gui, Add, Checkbox, x200 y185 vSkipMediaInfoFile Checked%SkipMediaInfoFile%, Use existing MediaInfo "Extra" File if it already exists
+  Gui, Add, Link,x189 y210, Crop detect settings <a href="https://yabb.jriver.com/interact/index.php/topic,106802.msg912759.html#msg912759">More Crop Detect Information</a>
+
+
+
+
+  Gui, Add, Edit, x220 y225 w80 h20 vCropScanPoint, %CropScanPoint%
+  Gui, Add, Text,x310 y225,<--- Enter Secs into video to measure Crop Factor`n         (leave blank or 0 to disable)
+  Gui, Add, Edit, x220 y255 w80 h20 vCropSettings, %CropSettings%
+  Gui, Add, Text,x310 y255,<--- Enter Custom Settings or leave blank for default`n         (eg 24:16:2 or 0.1:16:2 etc)
+  Gui, Add, Button, x500 y280 gButtonMediaInfo, Get MediaInfo  
 
 ; FilenameUpdater
   Gui Tab, 12
   Gui Add, GroupBox, x179 y7 w420 h300, Filename Updater
   Gui, Add, Text,x189 y30, Filename Updater : Select any # of Items in MC to change the Filename field
   Gui, Add, Text,, Main use: To update miscreated Particle Filenames that can not `nbe changed in MC's GUI
-;  Gui, Add, Edit,, vNewFileName
   Gui, Add, Button, x280 y125 gButtonUpdateFilename, Update Filename(s)
 
 
@@ -244,7 +250,7 @@ Gui Show, w610 h440, Swag of Tools
   Gui, Add, Text,x360 y190,<--- Enter MCWS Password
   Gui, Add, Button, x220 y220 w130 h20 gButtonTestMCWS, Test Configuratioin
   Gui, Add, Button, x220 y250 w130 h20 gButtonSaveMCWS, Save Configuration
-  
+
 ShowOptions:
     TV_GetText(OutputVar, A_EventInfo)
     GuiControl ChooseString, SysTabControl321, % OutputVar
@@ -386,43 +392,6 @@ ButtonChapterDBNum:
     GuiControl,,Log, %MsgLog%
   }
 return
-
-/* ******  http://www.chapterdb.org has been taken down so this function no longer works 
-ButtonAuto:
-  Gui, Submit, NoHide
-  guiControlGet, UserInput
-  gosub, MC_Current
-  gosub, MC_GetInfo
-  If Status !=200
-    return
-  If MC_FileExt = mpls ;or MC_FileType = MPLS
-    {
-	MsgLog = Checking for chapter Info Please Wait
-    GuiControl,,Log, %MsgLog%
-    hash = % MD5(MC_FilenameExt)
-    CDB_Call = http://www.chapterdb.org/chapters/disc-%hash%
-    GoSub, CDB_API
-    If Status = 200 
-      {
-      urldownloadtofile, http://www.chapterdb.org/Home/Download/%CDB_ID%?type=txt, temp.chapters.txt
-      MsgLog = Chapter Information found at http://www.chapterdb.org/Home/Download/%CDB_ID%`n%MsgLog%
-	  GuiControl,,Log, %MsgLog%
-	  AddMsg = 
-      gosub, Process_Chapters
-      }
-    Else
-      {
-      MsgLog = Error - %Status%  Processed Failed (see details below)`n`n%Result%`n%MsgLog%
-      GuiControl,,Log, %MsgLog%
-      }
-    }
-  Else
-  {
-    MsgLog = %MC_FilenameExt% is not a Bluray Playlist (*.mpls) file!`n%MsgLog%
-    GuiControl,,Log, %MsgLog%
-  }
-return
-*/
 
 ButtonReadMPLS:
   guiControlGet, UserInput
@@ -739,6 +708,7 @@ ButtonMediaInfo:
   IniWrite, %NoMediaInfoFile%, Swag of Tools.ini,MediaInfo_Settings,NoMediaInfoFile
   IniWrite, %SkipMediaInfoFile%, Swag of Tools.ini,MediaInfo_Settings,SkipMediaInfoFile
   IniWrite, %CropScanPoint%, Swag of Tools.ini,MediaInfo_Settings,CropScanPoint
+  IniWrite, %CropSettings%, Swag of Tools.ini,MediaInfo_Settings,CropSettings
   GuiControl,,Log, %MsgLog%
   Loop, parse, Result, `;
     If A_Index > 3
@@ -755,51 +725,52 @@ ButtonMediaInfo:
 		   RegExMatch(MC_FileNameExt,"(.*)(?=\\BDMV)", MC_FileNameExt)  ; keep this line
 		 If MC_FileExt = dvd;1
 		   RegExMatch(MC_FileNameExt,"(.*)(?=\\VIDEO_TS)", MC_FileNameExt)
-
 		 If (SkipMediaInfoFile=0 || !FileExist(MC_FileName "_MediaInfo.txt"))
 			{
-			Filedelete, %MC_FileName%_MediaInfo.txt
-			runwait, %comspec% /c MediaInfo\MediaInfo.exe "%MC_FileNameExt%" >> "%MC_FileName%_MediaInfo.txt",, Hide
-			MsgLog = Created Extra file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+			MsgLog = Commencing MediaInfo Scan (this may take some time) for "%MC_FileNameExt%"`n%MsgLog%
 			GuiControl,,Log, %MsgLog%
-
+			MediaInfoOutput = % CmdRet("MediaInfo\MediaInfo.exe" . " """ . MC_FileNameExt . """",, "UTF-8")
+			MsgLog = Finished Reading Media Info for "%MC_FileNameExt%"`n%MsgLog%
+			GuiControl,,Log, %MsgLog%
 			If MC_FileExt = bluray;1
 				{
-				LargestFileSizeKB = 0
-				Loop, %MC_FileNameExt%\BDMV\STREAM\*.M2TS, , 1
-					{
-					If (A_LoopFileSizeKB > LargestFileSizeKB)
-						{
-						M2TSFileName := A_LoopFileFullPath
-						LargestFileSizeKB := A_LoopFileSizeKB
-						}
-					}
-				runwait, %comspec% /c MediaInfo\MediaInfo.exe "%M2TSFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
-				MsgLog = Adding Largest M2TS file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+				MPLSFileName = %MC_FileNameExt%\BDMV\PLAYLIST
+				MediaInfoOutputExtra = % CmdRet("MediaInfo\MediaInfo.exe" . " """ . MPLSFileName . """",, "UTF-8")
+				MediaInfoOutput = %MediaInfoOutput% + %MediaInfoOutputExtra%
+				MsgLog = Reading Media Info for all the MPLS in "%MPLSFileName%"`n%MsgLog%
 				GuiControl,,Log, %MsgLog%
 				}
-
 			If MC_FileExt = dvd;1
 				{
 				Loop, %MC_FileNameExt%\*.IFO, , 1
 					{
 					IFOFileName := A_LoopFileFullPath
-					runwait, %comspec% /c MediaInfo\MediaInfo.exe "%IFOFileName%" >> "%MC_FileName%_MediaInfo.txt",, Hide
-					MsgLog = Adding IFO file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+					MediaInfoOutputExtra = % CmdRet("MediaInfo\MediaInfo.exe" . " """ . IFOFileName . """",, "UTF-8")
+					MediaInfoOutput = %MediaInfoOutput% + %MediaInfoOutputExtra%
+					MsgLog = Reading Media Infor for IFO file "%IFOFileName%"`n%MsgLog%
 					GuiControl,,Log, %MsgLog%
 					}
 				}
+			If (NoMediaInfoFile=0)
+				{
+				Filedelete, %MC_FileName%_MediaInfo.txt
+				Fileappend, %MediaInfoOutput%, %MC_FileName%_MediaInfo.txt
+				MsgLog = Created Extra file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+				GuiControl,,Log, %MsgLog%
+				}
 			}
-
-		 FileRead, MediaInfoOutput, %MC_FileName%_MediaInfo.txt
-
-		 If NoMediaInfoFile
-		 {
-		   Filedelete, %MC_FileName%_MediaInfo.txt
-		   MsgLog = Removed Extra file for "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
-           GuiControl,,Log, %MsgLog%
-		 }
-		 
+			Else 
+				{
+				FileRead, MediaInfoOutput, %MC_FileName%_MediaInfo.txt
+				MsgLog = Using existing "Extra" MediaInfo file for "%MC_FileName%"`n%MsgLog%
+				GuiControl,,Log, %MsgLog%
+				}
+			If StrLen(MediaInfoOutput) < 10 ;Skip if no MediaInfo Data
+				{
+				MsgLog = Skipping: Media Info could not analyse "%MC_FileName%_MediaInfo.txt"`n%MsgLog%
+				GuiControl,,Log, %MsgLog%
+				continue 
+				}
 		 IfInString, MediaInfoOutput, Atmos
 		   IfNotInString, MC_Compression, Atmos
 		   {
@@ -847,8 +818,6 @@ ButtonMediaInfo:
 
 		 If AllMediaInfoLanguage
 		 {
-;			StringReplace, AllMediaInfoLanguage, AllMediaInfoLanguage,:,;, All - No longer needed?
-;			StringReplace, AllMediaInfoLanguage, AllMediaInfoLanguage,/,;, All - No longer needed?
 			AllMediaInfoLanguage = %MC_Language%%AllMediaInfoLanguage%
 			Needle2 := ";"
 			FoundPos := InStr(AllMediaInfoLanguage,Needle2)
@@ -897,14 +866,11 @@ ButtonMediaInfo:
 					}
 				}
 
-					If AllMediaInfoValue
+;					If AllMediaInfoValue ; requested by lepa to blank values is no longer there
 					{
 						StringGetPos, SectionPos, AllMediaInfoValue,;%Space%
 						If (SectionPos = 0)
 							StringTrimLeft, AllMediaInfoValue, AllMediaInfoValue,2
-
-;						StringReplace, AllMediaInfoValue, AllMediaInfoValue,:,;, All
-;						StringReplace, AllMediaInfoValue, AllMediaInfoValue,/,;, All
 						MCFieldTargetCurrentClean = % UriEncode(MCFieldTargetCurrent)
 						AllMediaInfoValueClean = % UriEncode(AllMediaInfoValue)
 
@@ -934,22 +900,35 @@ ButtonMediaInfo:
 			GuiControl,,Log, %MsgLog%
 
 			If MC_FileExt = bluray;1
+			{
+				LargestFileSizeKB = 0
+				Loop, %MC_FileNameExt%\BDMV\STREAM\*.M2TS, , 1
+				{
+					If (A_LoopFileSizeKB > LargestFileSizeKB)
+					{
+						M2TSFileName := A_LoopFileFullPath
+						LargestFileSizeKB := A_LoopFileSizeKB
+					}
+				}
 				MC_FileNameExt := M2TSFileName
+			}
 
 			If MC_FileExt = dvd;1
 			{
 				LargestFileSizeKB = 0
 				Loop, %MC_FileNameExt%\*.VOB, , 1
+				{
+					If (A_LoopFileSizeKB > LargestFileSizeKB)
 					{
-						If (A_LoopFileSizeKB > LargestFileSizeKB)
-						{
-							VOBFileName := A_LoopFileFullPath
-							LargestFileSizeKB := A_LoopFileSizeKB
-						}
+						VOBFileName := A_LoopFileFullPath
+						LargestFileSizeKB := A_LoopFileSizeKB
 					}
+				}
 				MC_FileNameExt := VOBFileName
 			}
-			runwait, %comspec% /c ffmpeg\ffmpeg-N-102631-gbaf5cc5b7a-win64-gpl-shared\bin\ffmpeg.exe -ss %CropScanPointNow% -i "%MC_FileNameExt%" -t 10 -vf cropdetect -f null dummy > ffmpeg.txt 2>&1,, Hide
+			runwait, %comspec% /c ffmpeg\ffmpeg-N-102631-gbaf5cc5b7a-win64-gpl-shared\bin\ffmpeg.exe -ss %CropScanPointNow% -i "%MC_FileNameExt%" -t 10 -vf cropdetect=%CropSettings% -f null dummy > ffmpeg.txt 2>&1,, Hide
+
+
 
 			loop, Read, ffmpeg.txt
 			{
@@ -963,7 +942,7 @@ ButtonMediaInfo:
 			MC_Call = http://%MC_WS%/MCWS/v1/File/SetInfo?File=%MC_Key%&FileType=Key&Field=Crop&Value=%Crop%
 			GoSub, MCWS
 			If Status =200
-				MsgLog = The Crop Factor for "%MC_FileName%" is %Crop%`n%MsgLog%
+				MsgLog = The Crop Factor for "%MC_FileNameExt%" is %Crop%`n%MsgLog%
 		}
 ; End FFMpeg Section
 		}
@@ -1578,6 +1557,44 @@ Hex2Text(Hex) {
 		}
 	Return n
 	}
+
+; -----------Pipe "runwait, %comspec%..." output to a Variable?----------------------------------------------------------------
+; Thanks to users including teadrinker at - https://www.autohotkey.com/boards/viewtopic.php?f=76&t=96199
+CmdRet(sCmd, callBackFunc := "", encoding := "")
+{
+   static flags := [HANDLE_FLAG_INHERIT := 0x1, CREATE_NO_WINDOW := 0x8000000], STARTF_USESTDHANDLES := 0x100
+        
+   (encoding = "" && encoding := "cp" . DllCall("GetOEMCP", "UInt"))
+   DllCall("CreatePipe", "PtrP", hPipeRead, "PtrP", hPipeWrite, "Ptr", 0, "UInt", 0)
+   DllCall("SetHandleInformation", "Ptr", hPipeWrite, "UInt", flags[1], "UInt", flags[1])
+   
+   VarSetCapacity(STARTUPINFO , siSize :=    A_PtrSize*9 + 4*8, 0)
+   NumPut(siSize              , STARTUPINFO)
+   NumPut(STARTF_USESTDHANDLES, STARTUPINFO, A_PtrSize*4 + 4*7)
+   NumPut(hPipeWrite          , STARTUPINFO, siSize - A_PtrSize*2)
+   NumPut(hPipeWrite          , STARTUPINFO, siSize - A_PtrSize)
+   
+   VarSetCapacity(PROCESS_INFORMATION, A_PtrSize*2 + 4*2, 0)
+   if !DllCall("CreateProcess", "Ptr", 0, "Str", sCmd, "Ptr", 0, "Ptr", 0, "UInt", true, "UInt", flags[2]
+                              , "Ptr", 0, "Ptr", 0, "Ptr", &STARTUPINFO, "Ptr", &PROCESS_INFORMATION)
+   {
+      DllCall("CloseHandle", "Ptr", hPipeRead)
+      DllCall("CloseHandle", "Ptr", hPipeWrite)
+      throw "CreateProcess is failed"
+   }
+   DllCall("CloseHandle", "Ptr", hPipeWrite)
+   VarSetCapacity(sTemp, 4096), nSize := 0
+   while DllCall("ReadFile", "Ptr", hPipeRead, "Ptr", &sTemp, "UInt", 4096, "UIntP", nSize, "UInt", 0) {
+      sOutput .= stdOut := StrGet(&sTemp, nSize, encoding)
+      ( callBackFunc && %callBackFunc%(stdOut) )
+   }
+   DllCall("CloseHandle", "Ptr", NumGet(PROCESS_INFORMATION))
+   DllCall("CloseHandle", "Ptr", NumGet(PROCESS_INFORMATION, A_PtrSize))
+   DllCall("CloseHandle", "Ptr", hPipeRead)
+   Return sOutput
+}
+
+
 ;============ Download Function =============
 ; All thanks to use Bruttosozialprodukt for this fucntion at at http://www.autohotkey.com/board/topic/101007-super-simple-download-with-progress-bar/
 DownloadFile(UrlToFile, SaveFileAs, Overwrite := True, UseProgressBar := True) {
